@@ -15,6 +15,9 @@ global:
     tag: latest
     imagePullPolicy: Always
 
+  serviceaccount:
+    create: false
+
 # Optional Enviromental Values. Options can be found here(https://www.strongdm.com/docs/architecture/deployment/environment-variables).
 configMap:
   SDM_ORCHESTRATOR_PROBES: 9090
