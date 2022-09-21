@@ -5,6 +5,8 @@ metadata:
   labels:
     app: {{ .Release.Name }}-app
 {{- include "sdm.labels" . | indent 4 }}
+  annotations:
+{{- toYaml .Values.global.deployment.annotations | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -12,13 +14,22 @@ spec:
       app: {{ .Release.Name }}-app
   template:
     metadata:
+      annotations:
+{{- toYaml .Values.global.deployment.podannotations | nindent 8 }}
       labels:
         app: {{ .Release.Name }}-app
     spec:
+      serviceAccountName: {{ .Values.global.serviceaccount.name | default (printf "%s-sa" .Release.Name) }}
       containers:
       - name: {{ .Release.Name }}-app
         image: {{ .Values.global.deployment.repository | default "quay.io/sdmrepo/relay" }}:{{ .Values.global.deployment.tag | default "latest" }}
         imagePullPolicy: {{ .Values.global.deployment.imagePullPolicy | default "Always" }}
+        {{- with .Values.global.deployment.entrypoint }}
+        command:
+          {{- toYaml .command | nindent 10 }}
+        args:
+          {{- toYaml .args | nindent 10 }}
+        {{- end }}
         env:
         {{- include "sdm.extraEnvironmentVars" .Values.global | indent 8 }}
         - name: SDM_RELAY_TOKEN
